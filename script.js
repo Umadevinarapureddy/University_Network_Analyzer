@@ -1,7 +1,7 @@
 // SANDIP UNIVERSITY NETWORK CONNECTIVITY ANALYZER
+// Weighted Graph + BFS + Dijkstra's Algorithm
 
-// 1. VERTICES ARRANGED IN A CIRCLE
-// O Building is the central vertex.
+// 1. VERTICES
 
 const vertices = [
     { id: 0, name: "University Gate", x: 400, y: 85 },
@@ -11,29 +11,36 @@ const vertices = [
     { id: 4, name: "Y Building (Library)", x: 150, y: 260 }
 ];
 
-// 2. EDGES
-// Central O Building connects to all other vertices.
-// Additional edges preserve the specified campus sequence.
+// 2. WEIGHTED EDGES
+// Costs are illustrative distances in metres.
+// Replace these with measured campus distances.
 
 const edges = [
-    [0, 1], // Gate to O Building
-    [1, 2], // O Building to S Building
-    [2, 3], // S Building to Saffron Canteen
-    [3, 4], // Saffron Canteen to Y Building
-    [1, 3], // O Building to Saffron Canteen
-    [1, 4]  // O Building to Y Building
+    { from: 0, to: 1, cost: 100 }, // Gate to O
+    { from: 1, to: 2, cost: 150 }, // O to S
+    { from: 2, to: 3, cost: 80 },  // S to Canteen
+    { from: 3, to: 4, cost: 120 }, // Canteen to Y
+    { from: 1, to: 3, cost: 110 }, // O to Canteen
+    { from: 1, to: 4, cost: 130 }  // O to Y
 ];
 
-// 3. ADJACENCY LIST
+// 3. WEIGHTED ADJACENCY LIST
 
 const adjacency = vertices.map(() => []);
 
-edges.forEach(([a, b]) => {
-    adjacency[a].push(b);
-    adjacency[b].push(a);
+edges.forEach(edge => {
+    adjacency[edge.from].push({
+        to: edge.to,
+        cost: edge.cost
+    });
+
+    adjacency[edge.to].push({
+        to: edge.from,
+        cost: edge.cost
+    });
 });
 
-// 4. DRAW THE CIRCULAR NETWORK GRAPH
+// 4. DRAW THE NETWORK GRAPH WITH COST LABELS
 
 function drawNetwork(edgeId, vertexId, path = null) {
     const edgeLayer = document.getElementById(edgeId);
@@ -54,28 +61,59 @@ function drawNetwork(edgeId, vertexId, path = null) {
         }
     }
 
-    // Draw all edges
-    edgeLayer.innerHTML = edges.map(([a, b]) => {
-        const p = vertices[a];
-        const q = vertices[b];
-        const key = `${Math.min(a,b)}-${Math.max(a,b)}`;
+    // Draw edges and their costs
+    edgeLayer.innerHTML = edges.map(edge => {
+        const p = vertices[edge.from];
+        const q = vertices[edge.to];
+
+        const key =
+            `${Math.min(edge.from, edge.to)}-${Math.max(edge.from, edge.to)}`;
 
         const isPath = path === null || pathEdges.has(key);
         const edgeColor = isPath ? "#facc15" : "#e8d985";
         const edgeWidth = isPath ? 6 : 3;
 
+        // Position the cost label near the edge midpoint
+        const midX = (p.x + q.x) / 2;
+        const midY = (p.y + q.y) / 2;
+
+        const dx = q.x - p.x;
+        const dy = q.y - p.y;
+        const length = Math.hypot(dx, dy) || 1;
+
+        // Small offset perpendicular to the edge
+        const offset = 13;
+        const labelX = midX - (dy / length) * offset;
+        const labelY = midY + (dx / length) * offset;
+
         return `
-            <line
-                x1="${p.x}" y1="${p.y}"
-                x2="${q.x}" y2="${q.y}"
-                stroke="${edgeColor}"
-                stroke-width="${edgeWidth}"
-                stroke-linecap="round"
-            />
+            <g>
+                <line
+                    x1="${p.x}" y1="${p.y}"
+                    x2="${q.x}" y2="${q.y}"
+                    stroke="${edgeColor}"
+                    stroke-width="${edgeWidth}"
+                    stroke-linecap="round"
+                />
+
+                <text
+                    x="${labelX}"
+                    y="${labelY}"
+                    text-anchor="middle"
+                    dominant-baseline="middle"
+                    font-size="15"
+                    font-weight="bold"
+                    fill="#111111"
+                    stroke="#fafbfe"
+                    stroke-width="6"
+                    stroke-linejoin="round"
+                    paint-order="stroke"
+                >${edge.cost} m</text>
+            </g>
         `;
     }).join("");
 
-    // Draw all vertices as black circles
+    // Draw black vertices and location names
     vertexLayer.innerHTML = vertices.map(v => `
         <g>
             <circle
@@ -84,11 +122,13 @@ function drawNetwork(edgeId, vertexId, path = null) {
                 cy="${v.y}"
                 r="28"
             />
+
             <text
                 class="vertex-number"
                 x="${v.x}"
                 y="${v.y}"
             >V${v.id + 1}</text>
+
             <text
                 class="vertex-label"
                 x="${v.x}"
@@ -98,7 +138,8 @@ function drawNetwork(edgeId, vertexId, path = null) {
     `).join("");
 }
 
-// 5. BREADTH-FIRST SEARCH
+// 5. BREADTH-FIRST SEARCH (BFS)
+// Finds a route with the fewest edges in an unweighted graph.
 
 function bfs(start, destination) {
     const queue = [[start]];
@@ -113,9 +154,9 @@ function bfs(start, destination) {
         }
 
         for (const neighbour of adjacency[current]) {
-            if (!visited.has(neighbour)) {
-                visited.add(neighbour);
-                queue.push([...path, neighbour]);
+            if (!visited.has(neighbour.to)) {
+                visited.add(neighbour.to);
+                queue.push([...path, neighbour.to]);
             }
         }
     }
@@ -123,68 +164,156 @@ function bfs(start, destination) {
     return null;
 }
 
-// 6. PATH ANALYZER
+// 6. DIJKSTRA'S SHORTEST PATH ALGORITHM
+// Finds the minimum total cost in a non-negative weighted graph.
+
+function dijkstra(start, destination) {
+    const distances = vertices.map(() => Infinity);
+    const previous = vertices.map(() => null);
+    const visited = new Set();
+
+    distances[start] = 0;
+
+    while (visited.size < vertices.length) {
+        let current = -1;
+        let smallestDistance = Infinity;
+
+        // Find the unvisited vertex with the lowest cost
+        for (let i = 0; i < vertices.length; i++) {
+            if (
+                !visited.has(i) &&
+                distances[i] < smallestDistance
+            ) {
+                smallestDistance = distances[i];
+                current = i;
+            }
+        }
+
+        if (current === -1) break;
+        if (current === destination) break;
+
+        visited.add(current);
+
+        // Update the costs of neighbouring vertices
+        for (const neighbour of adjacency[current]) {
+            if (visited.has(neighbour.to)) continue;
+
+            const newCost =
+                distances[current] + neighbour.cost;
+
+            if (newCost < distances[neighbour.to]) {
+                distances[neighbour.to] = newCost;
+                previous[neighbour.to] = current;
+            }
+        }
+    }
+
+    if (distances[destination] === Infinity) {
+        return null;
+    }
+
+    // Reconstruct shortest path
+    const path = [];
+    let current = destination;
+
+    while (current !== null) {
+        path.unshift(current);
+        current = previous[current];
+    }
+
+    return {
+        path: path,
+        totalCost: distances[destination]
+    };
+}
+
+// 7. PATH ANALYZER USING DIJKSTRA
 
 function findSelectedRoute() {
     const startSelect = document.getElementById("pathStart");
     const endSelect = document.getElementById("pathEnd");
     const result = document.getElementById("routeResult");
 
+    if (!startSelect || !endSelect || !result) return;
+
     const start = Number(startSelect.value);
     const end = Number(endSelect.value);
 
-    if (start === end) {
-        drawNetwork("routeEdges", "routeVertices", [start]);
-
-        result.innerHTML = `
-            <strong>Same Location</strong><br>
-            You selected ${vertices[start].name}.
-            <br>Total Edges: 0
-        `;
+    if (
+        !Number.isInteger(start) ||
+        !Number.isInteger(end) ||
+        !vertices[start] ||
+        !vertices[end]
+    ) {
+        result.textContent = "Please select valid locations.";
         return;
     }
 
-    const path = bfs(start, end);
+    const shortest = dijkstra(start, end);
 
-    if (!path) {
+    if (!shortest) {
         result.textContent = "No route found.";
         return;
     }
+
+    const path = shortest.path;
 
     drawNetwork("routeEdges", "routeVertices", path);
 
     const routeNames = path.map(id => vertices[id].name);
 
     result.innerHTML = `
-        <strong>Route Found!</strong><br>
-        <strong>Starting Point:</strong> ${vertices[start].name}<br>
-        <strong>Destination:</strong> ${vertices[end].name}<br>
-        <strong>Shortest Route:</strong>
+        <strong>Shortest Route Found!</strong><br>
+        <strong>Starting Point:</strong>
+        ${vertices[start].name}<br>
+
+        <strong>Destination:</strong>
+        ${vertices[end].name}<br>
+
+        <strong>Shortest Route:</strong><br>
         ${routeNames.join(" → ")}<br>
-        <strong>Total Vertices:</strong> ${path.length}<br>
-        <strong>Total Edges:</strong> ${path.length - 1}
+
+        <strong>Total Vertices:</strong>
+        ${path.length}<br>
+
+        <strong>Total Edges:</strong>
+        ${path.length - 1}<br>
+
+        <strong>Total Distance:</strong>
+        ${shortest.totalCost} metres
     `;
 }
 
-// 7. CLEAR PATH ANALYZER
+// 8. CLEAR PATH ANALYZER
 
 function clearSelectedRoute() {
-    document.getElementById("pathStart").value = "0";
-    document.getElementById("pathEnd").value = "4";
+    const startSelect = document.getElementById("pathStart");
+    const endSelect = document.getElementById("pathEnd");
+    const result = document.getElementById("routeResult");
 
-    document.getElementById("routeResult").textContent =
+    startSelect.value = "0";
+    endSelect.value = "4";
+
+    result.textContent =
         "Select two locations and click Find Route.";
 
     drawNetwork("routeEdges", "routeVertices");
 }
 
-// 8. BFS DEMONSTRATION
+// 9. BFS DEMONSTRATION
 
 function showBFS() {
-    const start = Number(document.getElementById("pathStart").value);
-    const end = Number(document.getElementById("pathEnd").value);
+    const start = Number(
+        document.getElementById("pathStart").value
+    );
+    const end = Number(
+        document.getElementById("pathEnd").value
+    );
+    const result = document.getElementById("bfsResult");
 
-    // BFS traversal from the selected starting vertex
+    if (!result || !vertices[start] || !vertices[end]) return;
+
+    // BFS traversal order
     const queue = [start];
     const visited = new Set([start]);
     const traversal = [];
@@ -194,63 +323,102 @@ function showBFS() {
         traversal.push(current);
 
         for (const neighbour of adjacency[current]) {
-            if (!visited.has(neighbour)) {
-                visited.add(neighbour);
-                queue.push(neighbour);
+            if (!visited.has(neighbour.to)) {
+                visited.add(neighbour.to);
+                queue.push(neighbour.to);
             }
         }
     }
 
-    // Shortest path to selected destination
+    // Fewest-edge path using BFS
     const path = bfs(start, end);
 
-    document.getElementById("bfsResult").innerHTML = `
+    // Minimum-cost path using Dijkstra
+    const weightedPath = dijkstra(start, end);
+
+    result.innerHTML = `
         <strong>BFS Traversal:</strong><br>
         ${traversal.map(id => vertices[id].name).join(" → ")}
+
         <br><br>
-        <strong>Shortest Path:</strong><br>
-        ${path ? path.map(id => vertices[id].name).join(" → ") : "No route found"}
+        <strong>BFS Path (Fewest Edges):</strong><br>
+        ${path
+            ? path.map(id => vertices[id].name).join(" → ")
+            : "No route found"}
+
         <br><br>
-        <strong>Total Edges:</strong> ${path ? path.length - 1 : "N/A"}
+        <strong>Number of Edges in BFS Path:</strong>
+        ${path ? path.length - 1 : "N/A"}
+
+        <br><br>
+        <strong>Dijkstra's Minimum-Cost Path:</strong><br>
+        ${weightedPath
+            ? weightedPath.path.map(id => vertices[id].name).join(" → ")
+            : "No route found"}
+
+        <br><br>
+        <strong>Minimum Distance:</strong>
+        ${weightedPath ? weightedPath.totalCost + " metres" : "N/A"}
     `;
 }
 
-// 9. INITIALIZE THE WEBSITE
+// 10. INITIALIZE WEBSITE
 
 document.addEventListener("DOMContentLoaded", () => {
+    // Draw the main network
     drawNetwork("edges", "vertices");
 
-    document.getElementById("vertexCount").textContent =
-        vertices.length;
+    // Update graph statistics
+    const vertexCount = document.getElementById("vertexCount");
+    const edgeCount = document.getElementById("edgeCount");
+    const averageDegree = document.getElementById("averageDegree");
 
-    document.getElementById("edgeCount").textContent =
-        edges.length;
+    if (vertexCount) {
+        vertexCount.textContent = vertices.length;
+    }
+
+    if (edgeCount) {
+        edgeCount.textContent = edges.length;
+    }
 
     const totalDegree = adjacency.reduce(
-        (sum, list) => sum + list.length, 0
+        (sum, list) => sum + list.length,
+        0
     );
 
-    document.getElementById("averageDegree").textContent =
-        (totalDegree / vertices.length).toFixed(1);
+    if (averageDegree) {
+        averageDegree.textContent =
+            (totalDegree / vertices.length).toFixed(1);
+    }
 
-    document.getElementById("findRoute")
-        .addEventListener("click", findSelectedRoute);
+    // Connect buttons
+    const findButton = document.getElementById("findRoute");
+    const clearButton = document.getElementById("clearRoute");
+    const bfsButton = document.getElementById("bfsButton");
 
-    document.getElementById("clearRoute")
-        .addEventListener("click", clearSelectedRoute);
+    if (findButton) {
+        findButton.addEventListener("click", findSelectedRoute);
+    }
 
-    document.getElementById("bfsButton")
-        .addEventListener("click", showBFS);
+    if (clearButton) {
+        clearButton.addEventListener("click", clearSelectedRoute);
+    }
 
-    document.getElementById("pathStart")
-        .addEventListener("change", findSelectedRoute);
+    if (bfsButton) {
+        bfsButton.addEventListener("click", showBFS);
+    }
 
-    document.getElementById("pathEnd")
-        .addEventListener("change", findSelectedRoute);
+    const startSelect = document.getElementById("pathStart");
+    const endSelect = document.getElementById("pathEnd");
 
-    // Initial route
-    document.getElementById("pathStart").value = "0";
-    document.getElementById("pathEnd").value = "4";
+    if (startSelect && endSelect) {
+        startSelect.value = "0";
+        endSelect.value = "4";
 
-    findSelectedRoute();
+        startSelect.addEventListener("change", findSelectedRoute);
+        endSelect.addEventListener("change", findSelectedRoute);
+
+        // Show initial shortest route
+        findSelectedRoute();
+    }
 });
