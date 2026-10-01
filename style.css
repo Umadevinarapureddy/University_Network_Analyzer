@@ -1,0 +1,292 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f2f5fa;
+    color: #1d2939;
+    line-height: 1.6;
+}
+
+header {
+    background: #14213d;
+    color: white;
+    text-align: center;
+    padding: 30px 15px;
+    border-bottom: 5px solid #facc15;
+}
+
+header h1 {
+    font-size: 30px;
+    margin-bottom: 5px;
+}
+
+header p {
+    font-size: 17px;
+    color: #e1e8f5;
+}
+
+header span {
+    display: inline-block;
+    margin-top: 10px;
+    background: #263b60;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+main {
+    width: 90%;
+    max-width: 1100px;
+    margin: 30px auto;
+}
+
+.intro {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.intro h2 {
+    font-size: 25px;
+    color: #14213d;
+}
+
+.intro p {
+    color: #667085;
+}
+
+.graph-card, .details, .summary {
+    background: white;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(20,33,61,0.08);
+}
+
+.graph-card h2, .details h2, .summary h2 {
+    color: #14213d;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: #667085;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.graph-container {
+    width: 100%;
+    overflow-x: auto;
+    background: #fafbfe;
+    border: 1px solid #e5eaf2;
+    border-radius: 10px;
+}
+
+#campusGraph, #routeGraph {
+    display: block;
+    width: 100%;
+    min-width: 650px;
+    height: auto;
+}
+
+/* Black vertices */
+.vertex-circle, .route-vertex {
+    fill: #111111;
+    stroke: #333333;
+    stroke-width: 2;
+}
+
+/* White vertex numbers */
+.vertex-number, .route-number {
+    fill: white;
+    font-size: 15px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+/* Names beside vertices */
+.vertex-label, .route-label {
+    fill: #172033;
+    font-size: 14px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+
+/* Yellow edges */
+.graph-edge, .route-edge {
+    stroke: #facc15;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.route-edge {
+    stroke-width: 7;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 35px;
+    margin-top: 18px;
+    font-size: 13px;
+    color: #475467;
+}
+
+.vertex-key {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    background: #111111;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.edge-key {
+    display: inline-block;
+    width: 25px;
+    height: 5px;
+    background: #facc15;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.details ol {
+    padding-left: 25px;
+}
+
+.details li {
+    padding: 5px 0;
+}
+
+.path-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.path-controls label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 7px;
+    color: #344054;
+}
+
+.path-controls select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: white;
+    font-size: 14px;
+    color: #1d2939;
+}
+
+button {
+    background: #214f9c;
+    color: white;
+    border: none;
+    padding: 11px 18px;
+    margin-top: 15px;
+    border-radius: 7px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #15386f;
+}
+
+.clear-button {
+    background: #64748b;
+    margin-left: 6px;
+}
+
+.clear-button:hover {
+    background: #475569;
+}
+
+.route-result {
+    margin-top: 18px;
+    padding: 15px;
+    border-radius: 9px;
+    background: #f2f5fa;
+    color: #344054;
+    font-size: 14px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.route-heading {
+    margin-top: 25px;
+    margin-bottom: 12px;
+    color: #14213d;
+}
+
+.concept {
+    border-bottom: 1px solid #e8edf4;
+    padding: 15px 0;
+}
+
+.concept:last-child {
+    border-bottom: none;
+}
+
+.concept h3 {
+    color: #244e8a;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.concept p {
+    color: #596579;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.summary {
+    background: #14213d;
+    color: white;
+}
+
+.summary h2 {
+    color: #facc15;
+}
+
+.summary p {
+    padding: 5px 0;
+}
+
+footer {
+    text-align: center;
+    background: #14213d;
+    color: #dbe5f4;
+    padding: 20px;
+    font-size: 13px;
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 23px;
+    }
+
+    main {
+        width: 94%;
+        margin: 20px auto;
+    }
+
+    .graph-card, .details, .summary {
+        padding: 16px;
+    }
+
+    .path-controls {
+        grid-template-columns: 1fr;
+    }
+}

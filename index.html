@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sandip University Network Analyzer</title>
+<link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
+</head>
+<body>
+
+<header>
+    <h1>Sandip University</h1>
+    <p>University Network Connectivity Analyzer</p>
+    <span>Discrete Mathematics &amp; Logic</span>
+</header>
+
+<main>
+    <section class="intro">
+        <h2>Campus Network Graph</h2>
+        <p>A circular graph representation of selected university locations.</p>
+    </section>
+
+    <section class="graph-card">
+        <h2>University Network</h2>
+        <p class="subtitle">Circular vertices with central connectivity</p>
+        <div class="graph-container">
+            <svg id="campusGraph" viewBox="0 0 800 600"
+                 role="img" aria-label="Circular university network graph">
+                <g id="edges"></g>
+                <g id="vertices"></g>
+            </svg>
+        </div>
+        <div class="legend">
+            <span><i class="vertex-key"></i> Vertex</span>
+            <span><i class="edge-key"></i> Edge</span>
+        </div>
+    </section>
+
+    <section class="details" id="pathAnalyzer">
+        <h2>Path Analyzer</h2>
+        <p>Select two locations to find a route through the network.</p>
+
+        <div class="path-controls">
+            <div>
+                <label for="pathStart">Starting Location</label>
+                <select id="pathStart">
+                    <option value="0">University Gate</option>
+                    <option value="1">O Building</option>
+                    <option value="2">S Building</option>
+                    <option value="3">Saffron Canteen</option>
+                    <option value="4">Y Building (Library)</option>
+                </select>
+            </div>
+            <div>
+                <label for="pathEnd">Destination Location</label>
+                <select id="pathEnd">
+                    <option value="0">University Gate</option>
+                    <option value="1">O Building</option>
+                    <option value="2">S Building</option>
+                    <option value="3">Saffron Canteen</option>
+                    <option value="4">Y Building (Library)</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="findRoute">Find Route</button>
+        <button id="clearRoute" class="clear-button">Clear</button>
+
+        <div id="routeResult" class="route-result" aria-live="polite">
+            Select two locations and click Find Route.
+        </div>
+
+        <h3 class="route-heading">Selected Route Graph</h3>
+        <div class="graph-container">
+            <svg id="routeGraph" viewBox="0 0 800 600"
+                 role="img" aria-label="Selected route graph">
+                <g id="routeEdges"></g>
+                <g id="routeVertices"></g>
+            </svg>
+        </div>
+        <div class="legend">
+            <span><i class="vertex-key"></i> Vertex</span>
+            <span><i class="edge-key"></i> Edge</span>
+        </div>
+    </section>
+
+    <section class="details">
+        <h2>University Vertices</h2>
+        <ol>
+            <li>University Gate</li>
+            <li>O Building</li>
+            <li>S Building</li>
+            <li>Saffron Canteen</li>
+            <li>Y Building (Library)</li>
+        </ol>
+    </section>
+
+    <section class="details">
+        <h2>Graph Theory Concepts</h2>
+
+        <div class="concept">
+            <h3>1. Graph</h3>
+            <p>A graph is a mathematical structure consisting of vertices and edges.</p>
+        </div>
+
+        <div class="concept">
+            <h3>2. Vertices (V)</h3>
+            <p>Vertices represent university locations.</p>
+            <p>V = {University Gate, O Building, S Building,
+                Saffron Canteen, Y Building (Library)}</p>
+        </div>
+
+        <div class="concept">
+            <h3>3. Edges (E)</h3>
+            <p>Edges represent direct connections between locations.</p>
+            <p>E = {(Gate,O), (O,S), (S,Saffron),
+                (Saffron,Y), (O,Saffron), (O,Y)}</p>
+        </div>
+
+        <div class="concept">
+            <h3>4. Degree</h3>
+            <p>The degree of a vertex is the number of edges connected to it.</p>
+            <p>Gate = 1, O Building = 4, S Building = 2,
+                Saffron Canteen = 3, Y Building = 2.</p>
+        </div>
+
+        <div class="concept">
+            <h3>5. Path</h3>
+            <p>A path is a sequence of vertices connected by edges.</p>
+            <p>University Gate → O Building → S Building →
+                Saffron Canteen → Y Building (Library)</p>
+        </div>
+
+        <div class="concept">
+            <h3>6. Breadth-First Search (BFS)</h3>
+            <p>BFS explores vertices level by level and finds a path with the fewest edges in an unweighted graph.</p>
+            <button id="bfsButton">Show BFS Traversal</button>
+            <p id="bfsResult" aria-live="polite"></p>
+        </div>
+    </section>
+
+    <section class="summary">
+        <h2>Graph Summary</h2>
+        <p>Total Vertices: <strong id="vertexCount">5</strong></p>
+        <p>Total Edges: <strong id="edgeCount">6</strong></p>
+        <p>Average Degree: <strong id="averageDegree">2.4</strong></p>
+        <p>Network: <strong>Connected</strong></p>
+    </section>
+</main>
+
+<footer>
+    <p>Sandip University | Discrete Mathematics Project</p>
+</footer>
+
+</body>
+</html>
